@@ -40,7 +40,7 @@ func Migrate() {
 }
 
 func ModelsToMigrate(db *gorm.DB) {
-	err := db.AutoMigrate(&models.Movie{}, &models.Casting{})
+	err := db.AutoMigrate(&models.Movie{}, &models.Casting{}, &models.Genre{})
 	if err != nil {
 		fmt.Println("error migrate models movie ", err.Error())
 		panic("Migration Movie failed")
@@ -57,6 +57,16 @@ func ModelsToMigrate(db *gorm.DB) {
 	}
 
 	err = db.AutoMigrate(&models.Casting{}, &models.Actor{})
+	if err != nil {
+		panic("Migration Casting failed")
+	}
+
+	err = db.AutoMigrate(&models.Genre{})
+	if err != nil {
+		panic("Migration Casting failed")
+	}
+
+	err = db.AutoMigrate(&models.VotingHistory{})
 	if err != nil {
 		panic("Migration Casting failed")
 	}
@@ -131,6 +141,56 @@ func SeedActors() {
 		{ID: uuid.New(), Name: "Timothée Chalamet"},
 		{ID: uuid.New(), Name: "Florence Pugh"},
 		{ID: uuid.New(), Name: "Millie Bobby Brown"},
+	}
+
+	err = infra.GormConnection.CreateInBatches(actors, len(actors)).Error
+	if err != nil {
+		fmt.Println("err ", err.Error())
+	}
+
+}
+
+func SeedGenre() {
+	// Create a context that cancels on interrupt signals
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	defer cancel()
+
+	// Load configuration
+	err := config.LoadConfig("")
+	if err != nil {
+		panic(err)
+	}
+	logger.InitLogger(config.Cfg)
+	config.Cfg.MySqlConfig.ShowLog = true
+	// init infra
+	infra := infra.NewInfrastructure(config.Cfg)
+	infra, err, infraCleanUp := infra.InitInfrastructure(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer infraCleanUp()
+
+	actors := []models.Genre{
+		{Title: "Action"},
+		{Title: "Adventure"},
+		{Title: "Comedy"},
+		{Title: "Crime"},
+		{Title: "Drama"},
+		{Title: "Fantasy"},
+		{Title: "Historical"},
+		{Title: "Horror"},
+		{Title: "Mystery"},
+		{Title: "Romance"},
+		{Title: "Science Fiction"},
+		{Title: "Thriller"},
+		{Title: "War"},
+		{Title: "Western"},
+		{Title: "Animation"},
+		{Title: "Biography"},
+		{Title: "Documentary"},
+		{Title: "Family"},
+		{Title: "Musical"},
+		{Title: "Sport"},
 	}
 
 	err = infra.GormConnection.CreateInBatches(actors, len(actors)).Error

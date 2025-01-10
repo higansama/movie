@@ -33,8 +33,10 @@ func main() {
 		migration.Migrate()
 	case "seed-actor":
 		fmt.Println("seed actor")
-
 		migration.SeedActors()
+	case "seed-genre":
+		migration.SeedGenre()
+
 	default:
 		fmt.Println("expected 'runserver' or 'migrate' subcommands")
 		os.Exit(1)

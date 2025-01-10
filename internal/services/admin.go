@@ -10,6 +10,7 @@ import (
 	"movie-app/utils/exception"
 	"movie-app/utils/infra"
 	"movie-app/utils/pagination"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -33,6 +34,7 @@ func (a *AdminServiceImpl) EditMovie(id uuid.UUID, payload reqres.EditMovieReque
 	movie.Duration = payload.Duration
 	movie.Genres = payload.Genres
 	movie.Year = payload.Year
+	movie.UpdatedAt = time.Now()
 
 	return a.MovieRepo.Update(id, movie)
 }
@@ -48,7 +50,18 @@ func (a *AdminServiceImpl) GetAllMovies(page pagination.Pagination) ([]reqres.Mo
 
 	for _, v := range movies {
 		t := reqres.MovieResponse{
-			ID: v.ID.String(),
+			ID:          v.ID.String(),
+			Title:       v.Title,
+			Slug:        v.Slug,
+			Director:    v.Director,
+			Description: v.Description,
+			Duration:    v.Duration,
+			Genres:      v.Genres,
+			Files:       v.Files,
+			Year:        v.Year,
+			Count:       v.Count,
+			UploadedAt:  v.UploadedAt,
+			UpdatedAt:   v.UpdatedAt,
 		}
 		result = append(result, t)
 	}

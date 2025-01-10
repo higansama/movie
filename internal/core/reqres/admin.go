@@ -26,9 +26,7 @@ type Actor struct {
 }
 
 type EditMovieRequest struct {
-	ID          string `json:"id"`
 	Title       string `json:"title"`
-	Slug        string `json:"slug"`
 	Director    string `json:"director"`
 	Description string `json:"description"`
 	Duration    string `json:"duration"`

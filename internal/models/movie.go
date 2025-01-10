@@ -16,6 +16,7 @@ type Movie struct {
 	Description string
 	Duration    string
 	Casting     []Casting `gorm:"foreignKey:MovieID"`
+	Genre       []Genre   `gorm:"many2many:movie_genre"`
 	Genres      string
 	Files       string
 	Year        string
@@ -61,4 +62,20 @@ type Casting struct {
 	ActorID   uuid.UUID
 	Role      string
 	CreatedAt time.Time `gorm:"autoCreateTime"`
+}
+
+type Genre struct {
+	ID    uint `gorm:"primaryKey"`
+	Title string
+	Count int
+}
+
+type VotingHistory struct {
+	ID          int `gorm:"primaryKey"`
+	GenreID     uuid.UUID
+	MovieID     uuid.UUID
+	UserID      *uuid.UUID
+	IpAddress   string
+	IsLike      bool
+	DateCreated time.Time `gorm:"autoCreateTime"`
 }
