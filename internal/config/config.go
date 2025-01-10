@@ -26,6 +26,7 @@ type Config struct {
 		User     string `mapstructure:"user"`
 		Password string `mapstructure:"password"`
 		Database string `mapstructure:"database"`
+		ShowLog  bool   `mapstructure:"show_log"`
 	} `mapstructure:"mysql_config"`
 }
 

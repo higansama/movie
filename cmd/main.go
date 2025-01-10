@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"movie-app/cmd/migration"
 	"movie-app/internal/config"
+	"movie-app/internal/entrypoint"
 	"movie-app/utils/infra"
 	logger "movie-app/utils/logger"
 
@@ -17,6 +20,28 @@ import (
 )
 
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("expected 'runserver' or 'migrate' subcommands")
+		os.Exit(1)
+	}
+	fmt.Println("os.Args[1] ", os.Args[1])
+
+	switch os.Args[1] {
+	case "runserver":
+		runServer()
+	case "migrate":
+		migration.Migrate()
+	case "seed-actor":
+		fmt.Println("seed actor")
+
+		migration.SeedActors()
+	default:
+		fmt.Println("expected 'runserver' or 'migrate' subcommands")
+		os.Exit(1)
+	}
+}
+
+func runServer() {
 	// Create a context that cancels on interrupt signals
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
@@ -46,7 +71,9 @@ func main() {
 	engine.Use(cors.New(corsCfg))                                              // Allow all headers
 
 	// Initialize the application
+	entrypoint.NewAdminModule(*engine, config.Cfg, *infra)
 
+	// closing state
 	go func() {
 		// Run server on separate go routine for Go < 1.18 to make sure another
 		// deffered func in main working.

@@ -1,3 +1,7 @@
 package authgo
 
-type AuthJWT struct{}
+type AuthJWT struct {
+	ID   string
+	Name string
+	Role string
+}

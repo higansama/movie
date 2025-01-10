@@ -1,43 +1,66 @@
 package repositories
 
 import (
+	coreRepo "movie-app/internal/core/repositories"
 	"movie-app/internal/models"
+	"movie-app/utils/pagination"
 
-	"github.com/jinzhu/gorm"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type MovieRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func NewMovieRepository(db *gorm.DB) *MovieRepositoryImpl {
-	return &MovieRepositoryImpl{db: db}
+// Create implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) Create(movie *models.Movie) error {
+	g := m.db.Create(movie)
+	if g.Error != nil {
+		return g.Error
+	}
+	return nil
 }
 
-func (repo *MovieRepositoryImpl) Create(movie *models.Movie) error {
-	return repo.db.Create(movie).Error
+// Delete implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) Delete(id uint) error {
+	panic("unimplemented")
 }
 
-func (repo *MovieRepositoryImpl) Update(movie *models.Movie) error {
-	return repo.db.Save(movie).Error
-}
-
-func (repo *MovieRepositoryImpl) Delete(id uint) error {
-	return repo.db.Delete(&models.Movie{}, id).Error
-}
-
-func (repo *MovieRepositoryImpl) Hide(id uint) error {
-	return repo.db.Model(&models.Movie{}).Where("id = ?", id).Update("hidden", true).Error
-}
-
-func (repo *MovieRepositoryImpl) List() ([]models.Movie, error) {
+// FindAll implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) FindAll(page pagination.Pagination) ([]models.Movie, error) {
 	var movies []models.Movie
-	err := repo.db.Find(&movies).Error
-	return movies, err
+	offset := (page.Page - 1) * page.Limit
+	if err := m.db.Limit(page.Limit).Offset(offset).Find(&movies).Error; err != nil {
+		return nil, err
+	}
+	return movies, nil
 }
 
-func (repo *MovieRepositoryImpl) FindById(id uint) (*models.Movie, error) {
-	var movie models.Movie
-	err := repo.db.First(&movie, id).Error
-	return &movie, err
+// FindByID implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) FindByID(id uuid.UUID) (*models.Movie, error) {
+	var result models.Movie
+	err := m.db.Find(&result, "id = ?", id.String()).Error
+	if err != nil {
+		return &result, err
+	}
+	return &result, nil
+}
+
+// Hide implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) Hide(id uint) error {
+	panic("unimplemented")
+}
+
+// Update implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) Update(id uuid.UUID, movie *models.Movie) error {
+	var t models.Movie
+	if err := m.db.First(&t, id).Error; err != nil {
+		return err
+	}
+	return m.db.Save(&movie).Error
+}
+
+func NewMovieRepository(db *gorm.DB) coreRepo.MovieRepository {
+	return &MovieRepositoryImpl{db: db}
 }

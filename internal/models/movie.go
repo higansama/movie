@@ -9,33 +9,56 @@ import (
 )
 
 type Movie struct {
-	ID           uuid.UUID  `gorm:"primaryKey" json:"id"`
-	Name         string     `json:"name" gorm:"<-:create;column:name"`
-	Year         int        `json:"year"`
-	Description  string     `json:"description"`
-	Slug         string     `json:"slug"`
-	Director     string     `json:"director" gorm:"<-:create;column:director"`
-	CountingView int        `json:"counting_view"`
-	UploadedBy   uuid.UUID  `json:"uploaded_by"`
-	UploadedAt   time.Time  `json:"uploaded_at"`
-	EditedBy     *uuid.UUID `json:"edited_by"`
-	EditedAt     *time.Time `json:"edited_at"`
-	DeletedAt    *time.Time `json:"deleted_at"`
+	ID          uuid.UUID `gorm:"primaryKey" json:"id"`
+	Title       string
+	Slug        string
+	Director    string
+	Description string
+	Duration    string
+	Casting     []Casting `gorm:"foreignKey:MovieID"`
+	Genres      string
+	Files       string
+	Year        string
+	Count       int
+	UploadedAt  time.Time `gorm:"autoCreateTime"`
+	UpdatedAt   time.Time
 }
 
 // BeforeSave is a GORM hook that is triggered before saving a Movie record.
 func (m *Movie) BeforeSave(tx *gorm.DB) (err error) {
-	m.Name = strings.ToLower(m.Name)
+	m.Title = strings.ToLower(m.Title)
 	m.Director = strings.ToLower(m.Director)
+	m.SlugMaker()
 	return
 }
 
 // Slug parser
 func (m *Movie) SlugMaker() {
-	m.Slug = strings.ReplaceAll(strings.ToLower(m.Name), " ", "-")
+	m.Slug = strings.ReplaceAll(strings.ToLower(m.Title), " ", "-")
 }
 
 // Add CountingView to the Movie record.
 func (m *Movie) AddCountingView() {
-	m.CountingView++
+	m.Count++
+}
+
+type User struct {
+	ID       uuid.UUID `gorm:"primaryKey" json:"id"`
+	Name     string    `json:"name" gorm:"<-:create;column:name"`
+	Email    string    `gorm:"unique"`
+	Password string
+}
+
+type Actor struct {
+	ID      uuid.UUID `gorm:"primaryKey" json:"id"`
+	Name    string    `json:"name" gorm:"<-:create;column:name"`
+	Casting []Casting `gorm:"foreignKey:ActorID"`
+}
+
+type Casting struct {
+	ID        uuid.UUID `gorm:"primary_key"`
+	MovieID   uuid.UUID
+	ActorID   uuid.UUID
+	Role      string
+	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
