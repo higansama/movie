@@ -17,7 +17,6 @@ type Movie struct {
 	Duration    string
 	Casting     []Casting `gorm:"foreignKey:MovieID"`
 	Genre       []Genre   `gorm:"many2many:movie_genre"`
-	Genres      string
 	Files       string
 	Year        string
 	Count       int

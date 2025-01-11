@@ -13,4 +13,5 @@ type AdminServices interface {
 	GetMovie(id uuid.UUID) (models.Movie, error)
 	EditMovie(id uuid.UUID, payload reqres.EditMovieRequest) error
 	CreateMovie(movie reqres.CreateMovieRequest) (reqres.MovieResponse, error)
+	UploadMovie(path, movieID string) error
 }

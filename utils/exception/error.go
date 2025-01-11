@@ -47,6 +47,7 @@ func NewErrorMovie(httpcode int, message string, err error) ErrorMovie {
 }
 
 func ErrorResponse(err error) (http int, message, detail string) {
+	// cek err pars
 	errSplit := strings.Split(err.Error(), "~")
 	if len(errSplit) < 3 {
 		return 500, "internal server error", err.Error()
@@ -59,5 +60,10 @@ func ErrorResponse(err error) (http int, message, detail string) {
 	fmt.Println(errSplit[2])
 	fmt.Println("====================")
 	i, _ := strconv.Atoi(errSplit[0])
-	return i, errSplit[1], errSplit[2]
+	msg := errSplit[1]
+	if string(msg[len(msg)-1]) == "~" {
+		msg = msg[:len(msg)-1]
+	}
+
+	return i, msg, errSplit[2]
 }

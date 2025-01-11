@@ -32,22 +32,24 @@ func NewAdminController(
 
 	adminRoute := engine.Group("admin/movie")
 	adminRoute.POST("list", handler.ListMovies)
-	adminRoute.POST("create", handler.UploadMovie)
-	adminRoute.GET("/detail/:id", handler.UploadMovie)
+	adminRoute.POST("create", handler.CreateMovie)
+	adminRoute.PUT("upload/:id", handler.UploadMovie)
+	adminRoute.GET("/detail/:id", handler.FindByID)
 	adminRoute.PUT("/edit/:id", handler.EditMovie)
 
 	return nil
 }
 
-func (ac *AdminController) UploadMovie(c *gin.Context) {
-	// Implement the logic to upload a movie
+func (ac *AdminController) CreateMovie(c *gin.Context) {
 	var payload reqres.CreateMovieRequest
-	err := c.ShouldBind(&payload)
-	if err != nil {
-		reqres.JsonResponse(c, exception.NewErrorMovie(400, "Bad request", err), nil)
+
+	// Bind JSON data
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		reqres.JsonResponse(c, exception.NewErrorMovie(400, "Bad request form", err), nil)
 		return
 	}
 
+	// Set the file path and ID in the payload
 	response, err := ac.AdminService.CreateMovie(payload)
 	if err != nil {
 		reqres.JsonResponse(c, exception.NewErrorMovie(400, "Bad request", err), nil)
@@ -56,6 +58,39 @@ func (ac *AdminController) UploadMovie(c *gin.Context) {
 	reqres.JsonResponse(c, nil, response)
 }
 
+func (ac *AdminController) UploadMovie(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		reqres.JsonResponse(c, exception.NewErrorMovie(400, "Bad request", nil), nil)
+		return
+	}
+	uuid, err := utils.StringToUUID(id)
+	if err != nil {
+		reqres.JsonResponse(c, exception.NewErrorMovie(400, "invalid id", err), nil)
+		return
+	}
+	// Get the file from the form
+	file, err := c.FormFile("file")
+	if err != nil {
+		reqres.JsonResponse(c, exception.NewErrorMovie(400, "No file is received", err), nil)
+		return
+	}
+
+	// Upload the file
+	filePath, err := utils.UploadFile(file, uuid)
+	if err != nil {
+		reqres.JsonResponse(c, exception.NewErrorMovie(500, "Failed to upload file", err), nil)
+		return
+	}
+
+	err = ac.AdminService.UploadMovie(filePath, id)
+	if err != nil {
+		reqres.JsonResponse(c, exception.NewErrorMovie(500, "Failed to upload file", err), nil)
+		return
+	}
+
+	reqres.JsonResponse(c, nil, gin.H{"message": "success"})
+}
 func (ac *AdminController) EditMovie(c *gin.Context) {
 	id := c.Param("id")
 	uuid, err := utils.StringToUUID(id)

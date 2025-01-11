@@ -29,3 +29,4 @@ go.work
 
 # Environment variables
 .env
+./assets/file/*

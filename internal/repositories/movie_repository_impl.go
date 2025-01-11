@@ -15,9 +15,14 @@ type MovieRepositoryImpl struct {
 
 // Create implements repositories.MovieRepository.
 func (m *MovieRepositoryImpl) Create(movie *models.Movie) error {
-	g := m.db.Create(movie)
-	if g.Error != nil {
-		return g.Error
+	if err := m.db.Create(movie).Error; err != nil {
+		return err
+	}
+	if err := m.db.Model(movie).Association("Genres").Append(movie.Genre); err != nil {
+		return err
+	}
+	if err := m.db.Model(movie).Association("Castings").Append(movie.Casting); err != nil {
+		return err
 	}
 	return nil
 }
@@ -59,6 +64,17 @@ func (m *MovieRepositoryImpl) Update(id uuid.UUID, movie *models.Movie) error {
 		return err
 	}
 	return m.db.Save(&movie).Error
+}
+
+// Update implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) UpdateRaw(id string, data map[string]interface{}) error {
+	return m.db.Model(&models.Movie{}).Where("id = ?", id).Updates(data).Error
+}
+
+// AddMovieToGenre implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) AddMovieToGenre(movieID uuid.UUID, movie *models.Movie) error {
+	m.db.Model(models.Movie{}).Association("Genres").Append(movie.Genre)
+	return nil
 }
 
 func NewMovieRepository(db *gorm.DB) coreRepo.MovieRepository {

@@ -14,4 +14,5 @@ type MovieRepository interface {
 	Hide(id uint) error
 	FindByID(id uuid.UUID) (*models.Movie, error)
 	FindAll(page pagination.Pagination) ([]models.Movie, error)
+	AddMovieToGenre(movieID uuid.UUID, movie *models.Movie) error
 }
