@@ -13,15 +13,21 @@ type MovieRepositoryImpl struct {
 	db *gorm.DB
 }
 
+// IncreaseMovieWatcher implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) IncreaseMovieWatcher(movie *models.Movie) error {
+	movie.Count = movie.Count + 1
+	return m.db.Save(movie).Error
+}
+
 // Create implements repositories.MovieRepository.
 func (m *MovieRepositoryImpl) Create(movie *models.Movie) error {
 	if err := m.db.Create(movie).Error; err != nil {
 		return err
 	}
-	if err := m.db.Model(movie).Association("Genres").Append(movie.Genre); err != nil {
+	if err := m.db.Model(movie).Association("Genre").Append(movie.Genre); err != nil {
 		return err
 	}
-	if err := m.db.Model(movie).Association("Castings").Append(movie.Casting); err != nil {
+	if err := m.db.Model(movie).Association("Casting").Append(movie.Casting); err != nil {
 		return err
 	}
 	return nil
@@ -50,6 +56,16 @@ func (m *MovieRepositoryImpl) FindByID(id uuid.UUID) (*models.Movie, error) {
 		return &result, err
 	}
 	return &result, nil
+}
+
+// FindByQword implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) FindByQword(word string) ([]models.Movie, error) {
+	var results []models.Movie
+	err := m.db.Where("LOWER(title) LIKE ? OR LOWER(slug) LIKE ? OR LOWER(description) LIKE ? OR LOWER(director) LIKE ?", "%"+word+"%", "%"+word+"%", "%"+word+"%", "%"+word+"%").Find(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
 }
 
 // Hide implements repositories.MovieRepository.

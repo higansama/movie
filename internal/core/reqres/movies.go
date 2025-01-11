@@ -1,6 +1,9 @@
 package reqres
 
-import "time"
+import (
+	auth "movie-app/utils/auth"
+	"time"
+)
 
 type MovieResponse struct {
 	ID          string    `json:"id"`
@@ -16,4 +19,11 @@ type MovieResponse struct {
 	Count       int       `json:"count"`
 	UploadedAt  time.Time `json:"uploaded_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type WatchMovieReq struct {
+	auth.AuthJWT
+}
+type WatchMovie struct {
+	Link string `json:"link"`
 }

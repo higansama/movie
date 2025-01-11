@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,7 +17,7 @@ type Movie struct {
 	Description string
 	Duration    string
 	Casting     []Casting `gorm:"foreignKey:MovieID"`
-	Genre       []Genre   `gorm:"many2many:movie_genre"`
+	Genre       []Genre   `gorm:"many2many:movie_genres"`
 	Files       string
 	Year        string
 	Count       int
@@ -40,6 +41,14 @@ func (m *Movie) SlugMaker() {
 // Add CountingView to the Movie record.
 func (m *Movie) AddCountingView() {
 	m.Count++
+}
+
+// get geners ids
+func (m *Movie) GetMovieIds() (r []string) {
+	for _, v := range m.Genre {
+		r = append(r, strconv.Itoa(int(v.ID)))
+	}
+	return r
 }
 
 type User struct {
@@ -77,4 +86,11 @@ type VotingHistory struct {
 	IpAddress   string
 	IsLike      bool
 	DateCreated time.Time `gorm:"autoCreateTime"`
+}
+
+type WathcingHistory struct {
+	ID      int `gorm:"primaryKey"`
+	UserID  *uuid.UUID
+	MovieID uuid.UUID
+	WatchAt time.Time `gorm:"autoCreateTime"`
 }

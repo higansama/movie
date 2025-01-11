@@ -71,6 +71,11 @@ func ModelsToMigrate(db *gorm.DB) {
 		panic("Migration Casting failed")
 	}
 
+	err = db.AutoMigrate(&models.WathcingHistory{})
+	if err != nil {
+		panic("Migration Casting failed")
+	}
+
 }
 func AlterTable(db *gorm.DB, tableName string, newModel interface{}) {
 	if db.Migrator().HasTable(tableName) {

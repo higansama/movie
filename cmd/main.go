@@ -71,9 +71,12 @@ func runServer() {
 	corsCfg.AllowHeaders = []string{"*"}                                       // Mengizinkan semua header
 	corsCfg.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"} // Mengizinkan semua metode
 	engine.Use(cors.New(corsCfg))                                              // Allow all headers
+	engine.Static("/assets", "./assets")
 
 	// Initialize the application
-	entrypoint.NewAdminModule(*engine, config.Cfg, *infra)
+	entrypoint.NewAdminModule(engine, config.Cfg, *infra)
+
+	entrypoint.NewUserModule(engine, config.Cfg, *infra)
 
 	// closing state
 	go func() {

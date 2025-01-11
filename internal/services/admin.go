@@ -120,7 +120,10 @@ func (a *AdminServiceImpl) CreateMovie(payload reqres.CreateMovieRequest) (reqre
 		}
 		casts = append(casts, castingToInsert)
 	}
-
+	// err := a.CastingRepo.AddActorsToMovies(casts)
+	// if err != nil {
+	// 	return reqres.MovieResponse{}, exception.NewErrorMovie(500, "invalid id actor", err)
+	// }
 	// insert to movie genre
 	var genres []models.Genre
 	for _, v := range payload.Movie.Genres {
@@ -140,6 +143,7 @@ func (a *AdminServiceImpl) CreateMovie(payload reqres.CreateMovieRequest) (reqre
 		Description: payload.Movie.Description,
 		Duration:    payload.Movie.Duration,
 		Genre:       genres,
+		Casting:     casts,
 		Year:        payload.Movie.Year,
 	}
 
@@ -147,11 +151,6 @@ func (a *AdminServiceImpl) CreateMovie(payload reqres.CreateMovieRequest) (reqre
 	if err != nil {
 		return reqres.MovieResponse{}, exception.NewErrorMovie(500, "error creating movie", err)
 	}
-
-	// err = a.CastingRepo.AddActorsToMovies(casts)
-	// if err != nil {
-	// 	return reqres.MovieResponse{}, exception.NewErrorMovie(500, "error creating casting", err)
-	// }
 
 	response := reqres.MovieResponse{
 		ID:          dataToInsert.ID.String(),

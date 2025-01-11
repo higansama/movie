@@ -11,6 +11,14 @@ func ConvertUUIDToString(uuid *uuid.UUID) *string {
 	return &str
 }
 
+func ConvertStringToPointerUUID(s string) *uuid.UUID {
+	parsedUUID, err := uuid.Parse(s)
+	if err != nil {
+		return nil
+	}
+	return &parsedUUID
+}
+
 func CreateUuid() uuid.UUID {
 	uuid, _ := uuid.NewUUID()
 	return uuid

@@ -15,4 +15,6 @@ type MovieRepository interface {
 	FindByID(id uuid.UUID) (*models.Movie, error)
 	FindAll(page pagination.Pagination) ([]models.Movie, error)
 	AddMovieToGenre(movieID uuid.UUID, movie *models.Movie) error
+	IncreaseMovieWatcher(move *models.Movie) error
+	FindByQword(word string) ([]models.Movie, error)
 }

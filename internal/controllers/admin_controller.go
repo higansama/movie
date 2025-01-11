@@ -52,7 +52,7 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 	// Set the file path and ID in the payload
 	response, err := ac.AdminService.CreateMovie(payload)
 	if err != nil {
-		reqres.JsonResponse(c, exception.NewErrorMovie(400, "Bad request", err), nil)
+		reqres.JsonResponse(c, err, nil)
 		return
 	}
 	reqres.JsonResponse(c, nil, response)

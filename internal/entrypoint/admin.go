@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewAdminModule(engine gin.Engine, config config.Config, infra infra.Infrastructure) error {
+func NewAdminModule(engine *gin.Engine, config config.Config, infra infra.Infrastructure) error {
 	movieRepo := repositories.NewMovieRepository(infra.GormConnection)
 	castRepo := repositories.NewCastingImplementation(infra.GormConnection)
 	adminService, err := services.NewAdminServices(&infra, movieRepo, castRepo)
@@ -19,7 +19,7 @@ func NewAdminModule(engine gin.Engine, config config.Config, infra infra.Infrast
 	}
 
 	route := controllers.NewAdminController(
-		&engine,
+		engine,
 		adminService,
 		config,
 		infra,
