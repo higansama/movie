@@ -51,13 +51,6 @@ func (m *Movie) GetMovieIds() (r []string) {
 	return r
 }
 
-type User struct {
-	ID       uuid.UUID `gorm:"primaryKey" json:"id"`
-	Name     string    `json:"name" gorm:"<-:create;column:name"`
-	Email    string    `gorm:"unique"`
-	Password string
-}
-
 type Actor struct {
 	ID      uuid.UUID `gorm:"primaryKey" json:"id"`
 	Name    string    `json:"name" gorm:"<-:create;column:name"`

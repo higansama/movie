@@ -15,7 +15,8 @@ func NewUserModule(engine *gin.Engine, config config.Config, infra infra.Infrast
 	castRepo := repositories.NewCastingImplementation(infra.GormConnection)
 	wHistory := repositories.NewWathcingRepository(infra.GormConnection)
 	genreRepo := repositories.NewGenreRepository(infra.GormConnection)
-	userUsecase, err := services.NewUserServices(&infra, movieRepo, castRepo, genreRepo, wHistory)
+	userRepo := repositories.NewUserRepo(infra.GormConnection)
+	userUsecase, err := services.NewUserServices(&infra, movieRepo, castRepo, genreRepo, wHistory, userRepo)
 	if err != nil {
 		return err
 	}

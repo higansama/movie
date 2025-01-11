@@ -28,6 +28,7 @@ type Config struct {
 		Database string `mapstructure:"database"`
 		ShowLog  bool   `mapstructure:"show_log"`
 	} `mapstructure:"mysql_config"`
+	JwtKey string `mapstructure:"jwt_key"`
 }
 
 func LoadConfig(cfgPath string) error {
@@ -64,6 +65,9 @@ func LoadConfig(cfgPath string) error {
 			oerr = err
 			return
 		}
+
+		// auth
+		viper.SetDefault("jwt_key", "adaiujwu4835")
 
 		// create viper inititalization for config
 		viper.SetDefault("app_attribute.name", "movie-app")

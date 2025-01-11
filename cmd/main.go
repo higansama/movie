@@ -25,17 +25,28 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println("os.Args[1] ", os.Args[1])
+	fmt.Println("error disini  1")
 
 	switch os.Args[1] {
 	case "runserver":
 		runServer()
 	case "migrate":
+		fmt.Println("error disini  2")
 		migration.Migrate()
 	case "seed-actor":
 		fmt.Println("seed actor")
 		migration.SeedActors()
 	case "seed-genre":
 		migration.SeedGenre()
+	case "createadmin":
+		var username, password string
+		fmt.Print("Enter username: ")
+		fmt.Scanln(&username)
+		fmt.Print("Enter password: ")
+		fmt.Scanln(&password)
+		fmt.Printf("Creating admin with username: %s and password: %s\n", username, password)
+		// Call a function to create the admin user with the provided username and password
+		migration.CreateAdmin(username, password)
 
 	default:
 		fmt.Println("expected 'runserver' or 'migrate' subcommands")

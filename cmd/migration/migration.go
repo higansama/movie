@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"movie-app/internal/config"
 	"movie-app/internal/models"
+	"movie-app/utils/auth"
 	"movie-app/utils/infra"
 	"movie-app/utils/logger"
 	"os"
@@ -23,6 +24,7 @@ func Migrate() {
 	// Load configuration
 	err := config.LoadConfig("")
 	if err != nil {
+		fmt.Println("error disini 3", err.Error())
 		panic(err)
 	}
 	logger.InitLogger(config.Cfg)
@@ -31,10 +33,11 @@ func Migrate() {
 	infra := infra.NewInfrastructure(config.Cfg)
 	infra, err, infraCleanUp := infra.InitInfrastructure(ctx)
 	if err != nil {
+		fmt.Println("error disini  4")
 		panic(err)
 	}
 	defer infraCleanUp()
-
+	fmt.Println("migrate")
 	// Perform migration
 	ModelsToMigrate(infra.GormConnection)
 }
@@ -46,12 +49,12 @@ func ModelsToMigrate(db *gorm.DB) {
 		panic("Migration Movie failed")
 	}
 
-	err = db.AutoMigrate(&models.User{})
+	err = AlterTable(db, "users", models.User{})
 	if err != nil {
 		panic("Migration User failed: " + err.Error())
 	}
 
-	err = db.AutoMigrate(&models.Actor{})
+	err = AlterTable(db, "actors", models.Actor{})
 	if err != nil {
 		panic("Migration Actor failed")
 	}
@@ -77,18 +80,20 @@ func ModelsToMigrate(db *gorm.DB) {
 	}
 
 }
-func AlterTable(db *gorm.DB, tableName string, newModel interface{}) {
+func AlterTable(db *gorm.DB, tableName string, newModel interface{}) error {
 	if db.Migrator().HasTable(tableName) {
 		err := db.Migrator().AutoMigrate(newModel)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	} else {
 		err := db.AutoMigrate(newModel)
 		if err != nil {
 			panic("Creating table failed")
+			return err
 		}
 	}
+	return nil
 }
 
 func SeedActors() {
@@ -203,4 +208,42 @@ func SeedGenre() {
 		fmt.Println("err ", err.Error())
 	}
 
+}
+
+func CreateAdmin(username, password string) error {
+	salt := auth.GenerateSalt()
+	p := auth.GeneratePassword(salt, password)
+	user := &models.User{
+		ID:       uuid.New(),
+		Username: username,
+		Password: p,
+		Salt:     salt,
+		Role:     "admin",
+	}
+
+	// Create a context that cancels on interrupt signals
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	defer cancel()
+
+	// Load configuration
+	err := config.LoadConfig("")
+	if err != nil {
+		panic(err)
+	}
+	logger.InitLogger(config.Cfg)
+	config.Cfg.MySqlConfig.ShowLog = true
+	// init infra
+	infra := infra.NewInfrastructure(config.Cfg)
+	infra, err, infraCleanUp := infra.InitInfrastructure(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer infraCleanUp()
+
+	err = infra.GormConnection.Create(user).Error
+	if err != nil {
+		fmt.Println("err ", err.Error())
+	}
+
+	return nil
 }

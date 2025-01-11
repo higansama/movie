@@ -7,6 +7,7 @@ import (
 	coreService "movie-app/internal/core/services"
 	"movie-app/internal/models"
 	"movie-app/internal/utils"
+	"movie-app/utils/auth"
 	"movie-app/utils/exception"
 	"movie-app/utils/infra"
 	"movie-app/utils/pagination"
@@ -20,7 +21,42 @@ type UserServiceImpl struct {
 	MovieRepo    repositories.MovieRepository
 	CastingRepo  repositories.CastingRepo
 	GenreRepo    repositories.GenreRepo
+	UserRepo     repositories.UserRepositories
 	Wathcingrepo repositories.WathcingHistoryRepository
+}
+
+// Login implements services.UserServices.
+func (u *UserServiceImpl) Login(payload reqres.LoginRequest) (response auth.AuthJWT, err error) {
+	user, err := u.UserRepo.FindUser(payload.Username)
+	if err != nil {
+		return response, exception.NewErrorMovie(405, "user not found", err)
+	}
+
+	// validate password
+	if !user.ValidPassword(payload.Password) {
+		return response, exception.NewErrorMovie(405, "invalid username and password", nil)
+	}
+
+	response = auth.AuthJWT{
+		ID:           user.ID.String(),
+		Name:         user.Username,
+		Role:         user.Role,
+		IsRegistered: true,
+	}
+	return response, nil
+}
+
+// Register implements services.UserServices.
+func (u *UserServiceImpl) Register(payload reqres.UserRegister) error {
+	salt := auth.GenerateSalt()
+	password := auth.GeneratePassword(salt, payload.Password)
+	dataToInput := &models.User{
+		ID:       uuid.New(),
+		Username: payload.Username,
+		Salt:     salt,
+		Password: password,
+	}
+	return u.UserRepo.Register(*dataToInput)
 }
 
 // WatchMovie implements services.UserServices.
@@ -108,6 +144,7 @@ func NewUserServices(
 	castingRepo coreRepo.CastingRepo,
 	GenreRepo coreRepo.GenreRepo,
 	Wathcingrepo coreRepo.WathcingHistoryRepository,
+	UserRepo coreRepo.UserRepositories,
 ) (coreService.UserServices, error) {
 	u := &UserServiceImpl{
 		infra:        infra,
@@ -115,6 +152,7 @@ func NewUserServices(
 		CastingRepo:  castingRepo,
 		GenreRepo:    GenreRepo,
 		Wathcingrepo: Wathcingrepo,
+		UserRepo:     UserRepo,
 	}
 
 	return u, nil
