@@ -31,6 +31,7 @@ func NewUserController(
 	}
 
 	userRoute := engine.Group("user")
+	userRoute.Use(infra.Middleware.UserMiddleware)
 	userRoute.GET("watch/:id", handler.WathcMovie)
 	userRoute.GET("search", handler.Find)
 	userRoute.POST("register", handler.Register)

@@ -1,7 +1,7 @@
 package reqres
 
 import (
-	auth "movie-app/utils/auth"
+	"movie-app/utils/auth"
 	"strings"
 )
 

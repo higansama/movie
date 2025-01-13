@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"movie-app/internal/config"
+	"movie-app/utils/middleware"
 	"movie-app/utils/mysql"
+
+	"github.com/gin-gonic/gin"
 
 	"gorm.io/gorm"
 )
@@ -15,6 +18,7 @@ type Infrastructure struct {
 	GormConnection *gorm.DB
 	Ctx            context.Context
 	ErrorCh        chan error
+	Middleware     Middleware
 }
 
 func NewInfrastructure(cfg config.Config) *Infrastructure {
@@ -38,10 +42,38 @@ func (infra *Infrastructure) InitInfrastructure(ctx context.Context) (*Infrastru
 	infra.Ctx = ctx
 	cleanup = append(cleanup, mysqlCleanUp)
 
+	Middleware, err := infra.SetupMiddleware()
+	if err != nil {
+		return nil, err, nil
+	}
+	infra.Middleware = Middleware
+
 	return infra, nil, func() {
 		fmt.Println("Infra clean up")
 		for _, c := range cleanup {
 			c()
 		}
 	}
+}
+
+type Middleware struct {
+	AdminMiddleware func(ctx *gin.Context)
+	UserMiddleware  func(ctx *gin.Context)
+}
+
+func (infra *Infrastructure) SetupMiddleware() (Middleware, error) {
+	adminAuth, err := middleware.NewAdminMiddleware(infra.Config)
+	if err != nil {
+		return Middleware{}, err
+	}
+
+	userAuth, err := middleware.NewUserMiddleware(infra.Config)
+	if err != nil {
+		return Middleware{}, err
+	}
+
+	return Middleware{
+		AdminMiddleware: adminAuth.Handle,
+		UserMiddleware:  userAuth.Handle,
+	}, nil
 }

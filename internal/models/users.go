@@ -10,7 +10,7 @@ import (
 type User struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	Username  string    `gorm:"type:varchar(32);unique"`
-	Salt      string    `gorm:"type:longtext""`
+	Salt      string    `gorm:"type:longtext"`
 	Password  string    `gorm:"type:longtext"`
 	Role      string    `gorm:"type:varchar(12)"`
 	CreatedAt time.Time `gorm:"type:timestamp;autoCreateTime"`

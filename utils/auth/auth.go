@@ -56,6 +56,5 @@ func GeneratePassword(salt, password string) string {
 
 func NewVerifyPassword(password, storedpassword, salt string) bool {
 	nPassword := GeneratePassword(salt, password)
-
 	return nPassword == storedpassword
 }
