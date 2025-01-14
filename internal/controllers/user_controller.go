@@ -8,6 +8,7 @@ import (
 	"movie-app/utils/auth"
 	"movie-app/utils/exception"
 	"movie-app/utils/infra"
+	"movie-app/utils/pagination"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,12 +31,14 @@ func NewUserController(
 		Infra:        infra,
 	}
 
-	userRoute := engine.Group("user")
+	userRoute := engine.Group("user/movie")
 	userRoute.Use(infra.Middleware.UserMiddleware)
 	userRoute.GET("watch/:id", handler.WathcMovie)
 	userRoute.GET("search", handler.Find)
 	userRoute.POST("register", handler.Register)
 	userRoute.POST("login", handler.Login)
+	userRoute.POST("list", handler.ListMovie)
+	userRoute.POST("vote", handler.Vote)
 
 	return nil
 }
@@ -115,4 +118,48 @@ func (uc *UserController) Login(c *gin.Context) {
 	}
 
 	reqres.JsonResponse(c, nil, gin.H{"token": token})
+}
+
+func (uc *UserController) ListMovie(c *gin.Context) {
+	var payload pagination.Pagination
+	// Bind JSON data
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		reqres.JsonResponse(c, exception.NewErrorMovie(400, "Bad request form", err), nil)
+		return
+	}
+
+	// Set the file path and ID in the payload
+	r, err := uc.UserServices.ListMovies(payload)
+	if err != nil {
+		reqres.JsonResponse(c, err, nil)
+		return
+	}
+
+	reqres.JsonResponse(c, nil, r)
+}
+
+func (uc *UserController) Vote(c *gin.Context) {
+	var payload reqres.VoteRequest
+	// Bind JSON data
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		reqres.JsonResponse(c, exception.NewErrorMovie(400, "Bad request form", err), nil)
+		return
+	}
+
+	err := payload.Validate()
+	if err != nil {
+		reqres.JsonResponse(c, exception.NewErrorMovie(400, "Bad request form", err), nil)
+		return
+	}
+
+	payload.Auth = auth.GetAuthData(c)
+
+	// Set the file path and ID in the payload
+	err = uc.UserServices.Vote(payload)
+	if err != nil {
+		reqres.JsonResponse(c, err, nil)
+		return
+	}
+
+	reqres.JsonResponse(c, nil, gin.H{"message": "success"})
 }

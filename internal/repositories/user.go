@@ -12,8 +12,8 @@ type UserRepoImplementation struct {
 }
 
 // FindUser implements repositories.UserRepositories.
-func (u *UserRepoImplementation) FindUser(username string) (result models.User, err error) {
-	err = u.db.Find(&result).Error
+func (u *UserRepoImplementation) FindUser(username string) (result *models.User, err error) {
+	err = u.db.Where("LOWER(username) = LOWER(?)", username).First(&result).Error
 	return result, err
 }
 

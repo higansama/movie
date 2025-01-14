@@ -20,7 +20,8 @@ type Movie struct {
 	Genre       []Genre   `gorm:"many2many:movie_genres"`
 	Files       string
 	Year        string
-	Count       int
+	Count       int       `gorm:"default:0" json:"count"` // Default 0 untuk counter
+	Vote        int       `gorm:"default:0" json:"vote"`
 	UploadedAt  time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time
 }
@@ -51,6 +52,17 @@ func (m *Movie) GetMovieIds() (r []string) {
 	return r
 }
 
+// increaase vote
+func (m *Movie) IncreaseMovieVote() {
+	m.Vote++
+}
+
+func (m *Movie) DecreaseMovieVote() {
+	if m.Vote > 0 {
+		m.Vote--
+	}
+}
+
 type Actor struct {
 	ID      uuid.UUID `gorm:"primaryKey" json:"id"`
 	Name    string    `json:"name" gorm:"<-:create;column:name"`
@@ -72,13 +84,14 @@ type Genre struct {
 }
 
 type VotingHistory struct {
-	ID          int `gorm:"primaryKey"`
-	GenreID     uuid.UUID
-	MovieID     uuid.UUID
-	UserID      *uuid.UUID
-	IpAddress   string
-	IsLike      bool
-	DateCreated time.Time `gorm:"autoCreateTime"`
+	ID                int `gorm:"primaryKey"`
+	MovieID           uuid.UUID
+	UserID            *uuid.UUID
+	IpAddress         string
+	IsLike            bool
+	PreviousVoteMovie int
+	CurrentViteMovie  int
+	DateCreated       time.Time `gorm:"autoCreateTime"`
 }
 
 type WathcingHistory struct {

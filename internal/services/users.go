@@ -12,6 +12,7 @@ import (
 	"movie-app/utils/infra"
 	"movie-app/utils/pagination"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -23,6 +24,35 @@ type UserServiceImpl struct {
 	GenreRepo    repositories.GenreRepo
 	UserRepo     repositories.UserRepositories
 	Wathcingrepo repositories.WathcingHistoryRepository
+}
+
+// Vote implements services.UserServices.
+func (u *UserServiceImpl) Vote(payload reqres.VoteRequest) error {
+	// get movie id
+	movieID, _ := utils.StringToUUID(payload.MovieID)
+	movie, err := u.MovieRepo.FindByID(movieID)
+	if err != nil {
+		return exception.NewErrorMovie(500, "movie is not found", err)
+	}
+	prevVote := movie.Vote
+
+	if payload.Vote == 1 {
+		movie.IncreaseMovieVote()
+	} else {
+		movie.DecreaseMovieVote()
+	}
+
+	// save vote to vote history
+	userid := utils.ConvertStringToPointerUUID(payload.Auth.ID)
+	votingHistory := &models.VotingHistory{
+		UserID:            userid,
+		MovieID:           movieID,
+		IsLike:            payload.Vote == 1,
+		PreviousVoteMovie: prevVote,
+		CurrentViteMovie:  movie.Vote,
+		DateCreated:       time.Now(),
+	}
+	return u.MovieRepo.VoteMovie(movie, votingHistory)
 }
 
 // Login implements services.UserServices.
@@ -135,7 +165,30 @@ func (u *UserServiceImpl) VoteMovie() {
 
 // ListMovies implements services.UserServices.
 func (u *UserServiceImpl) ListMovies(page pagination.Pagination) ([]reqres.MovieResponse, error) {
-	panic("unimplemented")
+	movies, err := u.MovieRepo.FindAll(page)
+	if err != nil {
+		return nil, exception.NewErrorMovie(500, "error fetching movies", err)
+	}
+
+	var response []reqres.MovieResponse
+	for _, v := range movies {
+		rTempt := reqres.MovieResponse{
+			ID:          v.ID.String(),
+			Title:       v.Title,
+			Slug:        v.Slug,
+			Director:    v.Director,
+			Description: v.Description,
+			Duration:    v.Duration,
+			Files:       v.Files,
+			Year:        v.Year,
+			Count:       v.Count,
+			UploadedAt:  v.UploadedAt,
+			UpdatedAt:   v.UpdatedAt,
+		}
+		response = append(response, rTempt)
+	}
+
+	return response, nil
 }
 
 func NewUserServices(

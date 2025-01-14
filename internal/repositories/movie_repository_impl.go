@@ -13,9 +13,25 @@ type MovieRepositoryImpl struct {
 	db *gorm.DB
 }
 
+// VoteMovie implements repositories.MovieRepository.
+func (m *MovieRepositoryImpl) VoteMovie(movie *models.Movie, vote *models.VotingHistory) error {
+	// save movie vote
+	err := m.db.Save(movie).Error
+	if err != nil {
+		return err
+	}
+
+	// save to voting history
+	err = m.db.Create(&vote).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // IncreaseMovieWatcher implements repositories.MovieRepository.
 func (m *MovieRepositoryImpl) IncreaseMovieWatcher(movie *models.Movie) error {
-	movie.Count = movie.Count + 1
+	movie.Vote = movie.Vote + 1
 	return m.db.Save(movie).Error
 }
 

@@ -91,7 +91,7 @@ func (a *AdminServiceImpl) GetAllMovies(page pagination.Pagination) ([]reqres.Mo
 			// Genres:      v.Genres,
 			Files:      v.Files,
 			Year:       v.Year,
-			Count:      v.Count,
+			Count:      v.Vote,
 			UploadedAt: v.UploadedAt,
 			UpdatedAt:  v.UpdatedAt,
 		}

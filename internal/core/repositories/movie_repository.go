@@ -17,4 +17,5 @@ type MovieRepository interface {
 	AddMovieToGenre(movieID uuid.UUID, movie *models.Movie) error
 	IncreaseMovieWatcher(move *models.Movie) error
 	FindByQword(word string) ([]models.Movie, error)
+	VoteMovie(movie *models.Movie, vote *models.VotingHistory) error
 }

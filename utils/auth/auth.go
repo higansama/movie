@@ -7,6 +7,8 @@ import (
 	"movie-app/internal/config"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 	"github.com/xdg-go/pbkdf2"
@@ -57,4 +59,14 @@ func GeneratePassword(salt, password string) string {
 func NewVerifyPassword(password, storedpassword, salt string) bool {
 	nPassword := GeneratePassword(salt, password)
 	return nPassword == storedpassword
+}
+
+func GetAuthData(ctx *gin.Context) AuthJWT {
+	val, _ := ctx.Get("AUTH_DATA")
+
+	if claims, ok := val.(AuthJWT); ok {
+		return claims
+	}
+
+	return AuthJWT{}
 }

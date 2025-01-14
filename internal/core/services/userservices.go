@@ -16,4 +16,5 @@ type UserServices interface {
 	History()
 	VoteMovie()
 	WatchMovie(movieid uuid.UUID, payload reqres.WatchMovieReq) (reqres.WatchMovie, error)
+	Vote(payload reqres.VoteRequest) error
 }

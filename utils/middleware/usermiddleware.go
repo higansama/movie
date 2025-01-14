@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"movie-app/internal/config"
 	"movie-app/utils/auth"
 	"net/http"
@@ -35,7 +36,7 @@ func (m *UserMiddlware) Handle(ctx *gin.Context) {
 				return []byte(m.config.JwtKey), nil
 			},
 		)
-
+		fmt.Println(jwToken)
 		if err == nil {
 			claims := token.Claims.(*auth.AuthJWT)
 			if claims.Role != "user" {
@@ -57,5 +58,4 @@ func (m *UserMiddlware) Handle(ctx *gin.Context) {
 	ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 		"message": "Unauthorized",
 	})
-	return
 }

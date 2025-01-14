@@ -25,7 +25,6 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println("os.Args[1] ", os.Args[1])
-	fmt.Println("error disini  1")
 
 	switch os.Args[1] {
 	case "runserver":

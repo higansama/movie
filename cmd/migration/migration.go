@@ -37,7 +37,7 @@ func Migrate() {
 		panic(err)
 	}
 	defer infraCleanUp()
-	fmt.Println("migrate")
+	fmt.Println("migrating . . .")
 	// Perform migration
 	ModelsToMigrate(infra.GormConnection)
 }
@@ -46,7 +46,6 @@ func ModelsToMigrate(db *gorm.DB) {
 	err := db.AutoMigrate(&models.Movie{}, &models.Casting{}, &models.Genre{})
 	if err != nil {
 		fmt.Println("error migrate models movie ", err.Error())
-		panic("Migration Movie failed")
 	}
 
 	err = AlterTable(db, "users", models.User{})
@@ -69,9 +68,9 @@ func ModelsToMigrate(db *gorm.DB) {
 		panic("Migration Casting failed")
 	}
 
-	err = db.AutoMigrate(&models.VotingHistory{})
+	err = AlterTable(db, "voting_histories", &models.VotingHistory{})
 	if err != nil {
-		panic("Migration Casting failed")
+		panic("alter voting_histories failed")
 	}
 
 	err = db.AutoMigrate(&models.WathcingHistory{})
@@ -89,7 +88,6 @@ func AlterTable(db *gorm.DB, tableName string, newModel interface{}) error {
 	} else {
 		err := db.AutoMigrate(newModel)
 		if err != nil {
-			panic("Creating table failed")
 			return err
 		}
 	}

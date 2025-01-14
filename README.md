@@ -10,31 +10,51 @@ This is a movie management application built with Go, using the Gin framework fo
   - Delete movies
   - Hide movies
   - List movies
+  - Login
 
 - **User Functionality:**
   - View movie details
   - Rate movies
+  - Register
+  - Login
+  - Searching Movie
 
 ## Project Structure
+
 
 ```
 movie-app
 ├── cmd
 │   └── main.go                # Entry point of the application
 ├── internal
-│   ├── app
-│   │   ├── app.go             # Application initialization and logic
-│   │   └── routes.go          # Route definitions
+│   ├── core                   # Abstraction of functionality in the project. It should move to outer folder
+│   │   ├── repositories             # Main Repositories Interface
+|   │   │   ├── actors               # For Actor models functionality
+|   │   │   ├── castings             # For Casting models functionality
+|   │   │   ├── genre                # For Genre models functionality
+|   │   │   ├── movie                # For Movie models functionality
+|   │   │   ├── watch                # For Watch models functionality
+│   │   ├── reqres                   # Request And Response, in other words is JSON DTO, just in case you want to using gRPC, create protoc in other folder and assign to this model
+│   │   ├── services                 # Application initialization and logic
+|   │   │   ├── admin                # Admin abstraction functionality
+|   │   │   ├── user                 # User abstraction functionality
+│   ├── entrypoint
+│   │   ├── admin.go                 # Admin module initialization and logic
+│   │   └── user.go                  # User module initialization and logic
 │   ├── config
 │   │   └── config.go          # Configuration settings
 │   ├── controllers
 │   │   ├── admin_controller.go # Admin controller for movie management
 │   │   └── user_controller.go  # User controller for movie details and ratings
 │   ├── models
-│   │   └── movie.go            # Movie entity definition
+│   │   ├── movie.go            # Movie entity definition, and some models about the movie
+│   │   ├── users.go            # Users entity definition
 │   ├── repositories
-│   │   ├── movie_repository.go  # Movie repository interface
-│   │   └── movie_repository_impl.go # Implementation of the movie repository
+│   │   ├── cast_implementation.go           # Casting repository implementation
+│   │   ├── genre_implementation.go          # Genre repository implementation
+│   │   ├── movie_implementation.go          # Movie repository implementation
+│   │   ├── user_implementation.go           # User repository implementation
+│   │   └── wathc_implementation.go          # WatchHistory repository implementation
 │   ├── services
 │   │   ├── admin_service.go    # Business logic for admin operations
 │   │   └── user_service.go     # Business logic for user operations
@@ -67,10 +87,28 @@ Controllers in this project are responsible for handling HTTP requests and respo
 
 3. Configure the database connection in `internal/config/config.go`.
 
-4. Run the application:
+4. Migration
+   Migrate the models:
    ```
-   go run cmd/main.go
+   go run cmd/main.go migrate
    ```
+   -------------------------------------------------------------------------------------------------------------------------
+   Create admin: 
+   ```
+   go run cmd/main.go createadmin
+   ```
+   -------------------------------------------------------------------------------------------------------------------------
+   Make a seed
+   ```
+   go run cmd/main.go seed-actor
+   go run cmd/main.go seed-genre
+   ```
+
+5. Run the application:
+   ```
+   go run cmd/main.go runserver
+   ```
+
 
 ## Usage
 
